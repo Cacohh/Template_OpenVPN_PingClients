@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<zabbix_export>
+    <version>4.4</version>
+    <date>2020-04-10T22:04:50Z</date>
+    <groups>
+        <group>
+            <name>Templates Ping</name>
+        </group>
+    </groups>
+    <templates>
+        <template>
+            <template>Template Ping OpenVPN Clients Auto Discovery</template>
+            <name>Template Ping OpenVPN Clients Auto Discovery</name>
+            <groups>
+                <group>
+                    <name>Templates Ping</name>
+                </group>
+            </groups>
+            <discovery_rules>
+                <discovery_rule>
+                    <name>Discovery OpenVPN Clients and IP's</name>
+                    <type>ZABBIX_ACTIVE</type>
+                    <key>openvpn.discoveryClients</key>
+                    <delay>1h</delay>
+                    <item_prototypes>
+                        <item_prototype>
+                            <name>Ping Check {#CNAME}</name>
+                            <type>ZABBIX_ACTIVE</type>
+                            <key>PingCheck[{#IPVIRTUAL}]</key>
+                            <trends>360d</trends>
+                            <description>Item teste if client respond an icmp request from server, and store the results for the specified time.</description>
+                            <application_prototypes>
+                                <application_prototype>
+                                    <name>OpenVPN Pings Clients</name>
+                                </application_prototype>
+                                <application_prototype>
+                                    <name>OpenVPN Pings Client {#CNAME}</name>
+                                </application_prototype>
+                            </application_prototypes>
+                            <trigger_prototypes>
+                                <trigger_prototype>
+                                    <expression>{max(120)}=0</expression>
+                                    <name>Client OpenVPN Unreachable in {#CNAME}</name>
+                                    <priority>DISASTER</priority>
+                                    <description>Alerts if a client is not available thought ICMP inside OpenVPN tunnel.</description>
+                                </trigger_prototype>
+                            </trigger_prototypes>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Ping Latency {#CNAME}</name>
+                            <type>ZABBIX_ACTIVE</type>
+                            <key>PingLatency[{#IPVIRTUAL}]</key>
+                            <trends>360d</trends>
+                            <units>ms</units>
+                            <description>Check latency of a ICMP echo inside the VPN tunnel.</description>
+                            <application_prototypes>
+                                <application_prototype>
+                                    <name>OpenVPN Pings Clients</name>
+                                </application_prototype>
+                                <application_prototype>
+                                    <name>OpenVPN Pings Client {#CNAME}</name>
+                                </application_prototype>
+                            </application_prototypes>
+                            <trigger_prototypes>
+                                <trigger_prototype>
+                                    <expression>{avg(300)}&gt;90</expression>
+                                    <name>Critical Latency in OpenVPN client {#CNAME}</name>
+                                    <priority>HIGH</priority>
+                                    <description>Alerts if latency average for client is more than 190 seconds in 05 minutes inside OpenVPN tunnel..</description>
+                                    <dependencies>
+                                        <dependency>
+                                            <name>Client OpenVPN Unreachable in {#CNAME}</name>
+                                            <expression>{Template Ping OpenVPN Clients Auto Discovery:PingCheck[{#IPVIRTUAL}].max(120)}=0</expression>
+                                        </dependency>
+                                    </dependencies>
+                                </trigger_prototype>
+                                <trigger_prototype>
+                                    <expression>{avg(300)}&gt;60</expression>
+                                    <name>High Latency in OpenVPN client {#CNAME}</name>
+                                    <priority>AVERAGE</priority>
+                                    <description>Alerts if latency average for client is more than 160 seconds in 05 minutes inside OpenVPN tunnel..</description>
+                                    <dependencies>
+                                        <dependency>
+                                            <name>Client OpenVPN Unreachable in {#CNAME}</name>
+                                            <expression>{Template Ping OpenVPN Clients Auto Discovery:PingCheck[{#IPVIRTUAL}].max(120)}=0</expression>
+                                        </dependency>
+                                        <dependency>
+                                            <name>Critical Latency in OpenVPN client {#CNAME}</name>
+                                            <expression>{Template Ping OpenVPN Clients Auto Discovery:PingLatency[{#IPVIRTUAL}].avg(300)}&gt;90</expression>
+                                        </dependency>
+                                    </dependencies>
+                                </trigger_prototype>
+                            </trigger_prototypes>
+                        </item_prototype>
+                    </item_prototypes>
+                    <graph_prototypes>
+                        <graph_prototype>
+                            <name>Ping Latency in {#CNAME}</name>
+                            <ymin_type_1>FIXED</ymin_type_1>
+                            <graph_items>
+                                <graph_item>
+                                    <color>199C0D</color>
+                                    <item>
+                                        <host>Template Ping OpenVPN Clients Auto Discovery</host>
+                                        <key>PingLatency[{#IPVIRTUAL}]</key>
+                                    </item>
+                                </graph_item>
+                            </graph_items>
+                        </graph_prototype>
+                    </graph_prototypes>
+                </discovery_rule>
+            </discovery_rules>
+        </template>
+    </templates>
+</zabbix_export>

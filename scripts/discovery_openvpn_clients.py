@@ -1,7 +1,25 @@
-#!/usr/local/bin/python35
+#!/usr/local/bin/python2.7
+# Created by Cacohh
+# Date: 08/04/2020
 
+# Values for client configurations
+# Where in the status file start to search for clients info
+# Default: ROUTING_TABLE
+start_delimitator = "ROUTING TABLE"
+# Where in the status file stop to search for clients info
+# Default: GLOBAL STATS
+end_delimitator = "GLOBAL STATS"
+# Path to status file
+# Default: "/var/log/openvpn-status.log"
+status_file = "/var/log/openvpn-status.log"
+# Version of Zabbix Server to send data structure
+# Default: 4.2
+version_zabbix_server = 4.2
+
+###########################################################################################################################################
+# Don't touch, unless you have sure what are you doing
 # Read file and return an array of the file or portion if specified, like an array with which line like a value
-def read_file_part_specific(begin=None, end=None, status_file="/var/log/openvpn-status.log"):
+def read_file_part_specific(begin=None, end=None, status_file_arg=version_zabbix_server):
     file = open(status_file, 'r')
     lines = file.readlines()
     for line in lines:
@@ -53,21 +71,11 @@ def convert_array_to_json_zabbix_server_v4_2(array_file):
 
 # Execute if standalone program
 if __name__ == '__main__':
-    import sys
-    argsLen = len(sys.argv)
-    if argsLen < 3:
-        print("Missing parameter")
-    elif argsLen == 3:
-        print(convert_array_to_json_zabbix_server_v4_2(read_file_part_specific(sys.argv[1], sys.argv[2])))
-    elif argsLen == 4:
-        if sys.argv[3] == "4.0":
-            print(convert_array_to_json_zabbix_server_v4_0(read_file_part_specific(sys.argv[1], sys.argv[2])))
-        elif sys.argv[3] == "4.2":
-            print(convert_array_to_json_zabbix_server_v4_2(read_file_part_specific(sys.argv[1], sys.argv[2])))
-        else:
-            print(convert_array_to_json_zabbix_server_v4_2(read_file_part_specific(sys.argv[1], sys.argv[2], sys.argv[3])))
-    elif argsLen == 5:
-        if sys.argv[3] == "4.0":
-            print(convert_array_to_json_zabbix_server_v4_0(read_file_part_specific(sys.argv[1], sys.argv[2], sys.argv[4])))
-        else:
-            print(convert_array_to_json_zabbix_server_v4_2(read_file_part_specific(sys.argv[1], sys.argv[2], sys.argv[4])))
+    if version_zabbix_server == 4.0:
+        print(convert_array_to_json_zabbix_server_v4_0(read_file_part_specific(start_delimitator, end_delimitator)))
+    elif version_zabbix_server == 4.2:
+        print(convert_array_to_json_zabbix_server_v4_2(read_file_part_specific(start_delimitator, end_delimitator)))
+
+
+
+
