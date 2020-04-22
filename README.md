@@ -1,66 +1,78 @@
-# Template PVE Zsync
+# Template OpenVPN Ping Clients
 
-Template for monitoring replications jobs perfomaded by PVE Zsync tool in PVE. The project uses python 3 scripts and works starting with Zabbix Server 4.0. A modification
-in discovery rule is needed to worker with versions newer than 4.2.
+Template for monitoring ping availability and latency of connected clients using fping tool. The project uses python 3 scripts, although seems to work well with the version 2.
 
 ## Getting Started
 
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
+These instructions will get you a copy of the project up and running on your local machine for development, testing and production purposes. See deployment for notes on how to deploy the project on a live system.
 
 ### Prerequisites
 
-What things you need to run the scripts and how to install them using pip3. (Consulte the documentation of your system to install pip3 if you haven't)
+What things you need to run the scripts and commands. (Consult the documentation of your system to install dependencies if is not already installed on in your system.)
 
 ```
-pip3 install python-crontab
-pip3 install croniter
-pip3 install cron-descriptor
+sed
+egrep
+grep
+cut
+fping
+```
+Your OpenVPN deployment need to have a status log file to obtain the informations needed. Add the following line in your openvpn server config file. Example: (Default in linux: /etc/openvpn/server.conf )
+```
+status /var/log/openvpn-status.log
+```
+and given the rith permissions for the zabbix user could read the status file. Example:
+```
+chmod 644 /var/log/openvpn-status.log
 ```
 ### Installing
 
-Clone the repositorie to your machine, and enter in it. And after that, create a scripts folder in your zabbix-agent configuration folder. (Default: /etc/zabbix/)
+Clone the repository to your machine, and enter in it. After, create a "scripts" folder in your zabbix-agent configuration folder. Example: (Default in linux: /etc/zabbix/. Change accordingly with your OS default.)
 
 ```
 mkdir /etc/zabbix/scripts
 ```
 
-Then, copy the scripts to te folder.
+Then, copy the scripts to te folder. Example:
 
 ```
-cp ./Template-PVE-Zsync/scripts/* /etc/zabbix/scripts
+cp ./Template_OpenVPN_PingClients/scripts/* /etc/zabbix/scripts
 ```
-Copy the userparameter file to the zabbix_agentd.d folder.
+Copy the userparameters files to the zabbix_agentd.d folder. Example:
 
 ```
-cp ./Template-PVE-Zsync/userparameter_pve_zsync.conf /etc/zabbix/zabbix_agentd.d/
+cp ./Template_OpenVPN_PingClients/userparameter_* /etc/zabbix/zabbix_agentd.d/
 ```
-Restart the zabbix-agent in your system. (The example below is made with Proxmox 6.x)
+Restart the zabbix-agent in your system. Example: (Debian like systems.) 
 
 ```
 /etc/init.d/zabbix-agent restart
 ```
 
-After that, import the template file "template_pve_zsync.xml" in your zabbix server frontend, and see your recent data coming.
+After that, import the template file "template_OpenVPN_PingClients.xml" in your zabbix server frontend, and see your recent data coming.
+
 
 ## Details about Deployment
 
-This project was developed and tested in Proxmox 6.0-4 and pve-zsync: 2.0-1.
+The discovery item parameters can be configured in script file itself and in the respective fields. Adjust accordingly with your system and preferences. 
 
-The discovery item in the template receive a argument, that can be 4.0 or 4.2 (For >= 4.2. Default 4.2). Adjust accordly with your zabbix server version. 
-The NextRun and PreviousRun item is disabled for default. Active if you want to. 
+The Zabbix template has 3 items in the two userparameters file. Details about below:
+// userparameter_discovery_openvpn_clients.conf
+* openvpn.discoveryClients - Discover client common name and internal ip for pings tests in the status log file. Edit the script "discovery_openvpn_clients.py"
+, in the "scripts" folder. The file has the fields that could be changed, and comments to help you.
+//userparameter_ping.conf
+* PingCheck[<IP>] - Return if the specified ip given as argument is available thought ICMP ping request.
+* PingLatency[<IP>] - Return the latency in "ms" of the specified ip given as argument, accordlying with the ICMP request and reply test.
 
-The Zabbix template has 5 items. Details about below:
+## Comments of the Author
 
-* pvezsync.Jobstate[] - Return the state of replications tasks discovered. Receive a argument (4.0 or 4.2) to return the right data structure to Zabbix server. If you use => 4.2 use 4.2.
-* pvezsync.NextRun[] - Return the date of the next run scheduled for the replication task.
+This project was developed and tested until now in PFSense 2.4.4-RELEASE-p3. Some details is omitted, like the different path for zabbix config files, and the "Include" parameter for the userparameters
+files in "zabbix_agentd.conf" file. Although steps here is written with PFSense, FreeBSD and Debian like systems in mind, probably work in others unix like systems, with the appropriate workarounds and adjusts.
 
-* pvezsync.PreviousRun[] - Return the date of the previous run scheduled for the replication task.
-* pvezsync.JobMaxSnap[] - Return the value of the maxsnap argument for the replication task.
-
+Let me know if you have some problem, or the workarounds and improvements that you made in your environment!
 
 ## Built With
 
-* [Pve-zsync: 2.0-1](https://pve.proxmox.com/wiki/PVE-zsync) - The ZFS replication tool from Proxmox
 * [Zabbix 4.2](https://www.zabbix.com/documentation/4.2/manual) - The IT monitoring tool 
 * [Python 3](https://www.python.org/) - A nice language to programming
 

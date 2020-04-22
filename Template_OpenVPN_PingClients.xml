@@ -31,7 +31,7 @@
                             <description>Item teste if client respond an icmp request from server, and store the results for the specified time.</description>
                             <application_prototypes>
                                 <application_prototype>
-                                    <name>OpenVPN Pings Clients</name>
+                                    <name>OpenVPN Pings Clients<    /name>
                                 </application_prototype>
                                 <application_prototype>
                                     <name>OpenVPN Pings Client {#CNAME}</name>
